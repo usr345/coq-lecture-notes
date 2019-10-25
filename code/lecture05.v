@@ -162,7 +162,6 @@ exact: id.
 Qed.
 
 
-
 (** * Switching views at the goal *)
 
 Lemma special_support_for_reflect_predicates'' (b c : bool) :
@@ -388,8 +387,3 @@ About count_nseq.
 
 (** You can learn more using the following search query: *)
 Search _ nat_of_bool.
-
-
-
-
-

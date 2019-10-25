@@ -11,10 +11,11 @@ Variant eq_xor_neq (T : eqType) (x y : T) : bool -> bool -> Set :=
   | EqNotNeq of x = y : eq_xor_neq x y true true
   | NeqNotEq of x != y : eq_xor_neq x y false false.
 
+Search _ reflect.
 Lemma eqVneq (T : eqType) (x y : T) :
   eq_xor_neq x y (y == x) (x == y).
 Proof.
-Admitted.
+  case (x == y) eqn:E.
 
 (* Use eqVneq to prove the following lemma.
    Hint: use [case: eqVneq] *)
@@ -108,5 +109,3 @@ Lemma not_fix :
 Proof. by move/(_ False id). Qed.
 
 End IntLogic.
-
-
