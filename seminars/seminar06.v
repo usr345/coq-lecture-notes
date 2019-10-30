@@ -40,7 +40,7 @@ Definition tri_eq_mixin := EqMixin eq_tri_correct.
 Canonical tri_eqType := EqType tri tri_eq_mixin.
 (** This should not fail! *)
 Check (1, Yes) == (1, Maybe).
-
+Compute (1, Yes) == (1, Maybe).
 
 (** Define equality type for the [Empty_set] datatype *)
 (** This should not fail! *)
@@ -80,27 +80,56 @@ Proof.
     (* Search _ (true || _). *)
     case: eqP.
     move=> ->. apply: ReflectT.
-    + by left.
-
-
+    + by left. rewrite orbF. move=> Hxny. constructor. rewrite /not.
+      move=> H. case: H.
+      * exact Hxny.
+        exact.
 Qed.
 
 Variables (A B : eqType) (f : A -> B) (g : B -> A).
 
+(* Функция инъективна, когда
+   forall a, b \in X, f(a) = f(b) -> a = b
+ *)
+(* Inductive reflect (P : Prop) : bool -> Set := *)
+(*     ReflectT : P -> reflect P true *)
+(*   | ReflectF : ~ P -> reflect P false *)
+(* eqP *)
+(*      : reflect (?x = ?y) (?x == ?y) *)
+
 Lemma inj_eq : injective f -> forall x y, (f x == f y) = (x == y).
 Proof.
-Admitted.
+  rewrite /injective. move=> Hinj x y. case: eqP.
+  - move=> Hf. apply Hinj in Hf.
+    (* Как вместо этих 2-х команд применить Hinj к голове цели? *)
+    case: eqP => //=.
+  - rewrite /not. move=> Hf. case: eqP => //=. move=> Hxy.
+    rewrite <- Hxy in Hf. case: (Hf (@erefl B (f x))).
+Qed.
 
 
 Lemma can_eq : cancel f g -> forall x y, (f x == f y) = (x == y).
 Proof.
-Admitted.
+  rewrite /cancel. move=> HRevExists x y. case: eqP.
+  - move=> Hf. case: eqP=> //=. rewrite /not. move=> Hxny.
+    set (Ex := HRevExists x).
+    rewrite <- Ex in Hxny.
+    rewrite Hf in Hxny.
+    rewrite HRevExists in Hxny.
+    case: (Hxny erefl).
+  - move=> Hf. case: eqP=> //=. move=> Hxy.
+    (* rewrite <- Hxy in Hf. case: (Hf erefl).*)
+     move: Hf. move: Hxy <-. by case.
+Qed.
 
+Search "addnI".
 
 Lemma eqn_add2l p m n : (p + m == p + n) = (m == n).
 Proof.
-Admitted.
-
+  case: eqP.
+  - move=> H. apply addnI in H. move: H ->. by rewrite eq_refl.
+    move=> H. case: eqP=> //=. move=> Eq. rewrite Eq in H. by case: H.
+Qed.
 
 Lemma expn_eq0 m e : (m ^ e == 0) = (m == 0) && (e > 0).
 Proof.
