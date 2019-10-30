@@ -100,8 +100,10 @@ Variables (A B : eqType) (f : A -> B) (g : B -> A).
 Lemma inj_eq : injective f -> forall x y, (f x == f y) = (x == y).
 Proof.
   rewrite /injective. move=> Hinj x y. case: eqP.
-  - move=> Hf. apply Hinj in Hf.
-    (* Как вместо этих 2-х команд применить Hinj к голове цели? *)
+  - move /Hinj.
+    (* Как вместо этих 2-х команд применить Hinj к голове цели?
+       move=> Hf. apply Hinj in Hf.
+    *)
     case: eqP => //=.
   - rewrite /not. move=> Hf. case: eqP => //=. move=> Hxy.
     rewrite <- Hxy in Hf. case: (Hf (@erefl B (f x))).
@@ -135,10 +137,17 @@ Lemma expn_eq0 m e : (m ^ e == 0) = (m == 0) && (e > 0).
 Proof.
 Admitted.
 
-
+(* Unset Printing Notations. *)
+(* Print in_mem. *)
+(* Search _ (_ \notin _). *)
 Lemma seq_last_notin (s : seq A) x :
         last x s \notin s = (s == [::]).
 Proof.
-Admitted.
+  case: memPn=> H.
+  elim: s=> /=.
+  - apply: esym. apply: eq_refl.
+  - move=> a l. case: l=> /=.
+    + rewrite eq_refl=> _.
+
 
 End EqType.
