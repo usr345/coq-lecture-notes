@@ -3,10 +3,28 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-
 (** Implement an instance of equality type for the [seq] datatype *)
+Search "seq".
+Fixpoint eq_seq {T: eqType} (x y: seq T) : bool :=
+  match x, y with
+  | [::],[::] => true
+  | cons x' xs, [::] => false
+  | [::], cons y' ys => false
+  | cons x' xs, cons y' ys => (x' == y') && eq_seq xs ys
+  end.
 
+Arguments eq_seq T x y : simpl nomatch.
 
+Lemma eq_seq_correct : forall T: eqType, Equality.axiom (@eq_seq T).
+Proof.
+  move=> T x. elim: x=> [|x' xs].
+  - move=> y. case: y=> //=; by constructor.
+  - move=> IH y. case: y=> [| y' ys].
+    + rewrite /(eq_seq (x' :: xs) [::]). constructor. done.
+    + move=> /=. case E: (x' == y').
+Qed.
+
+Compute eq_seq [:: 1] [:: 1;2].
 
 (** Take apart the following proof: *)
 Lemma size_eq0 (T : eqType) (s : seq T) :
@@ -78,5 +96,3 @@ Admitted.
 Lemma nth_rev T (x0 : T) n (s : seq T) :
   n < size s -> nth x0 (rev s) n = nth x0 s (size s - n.+1).
 Admitted.
-
-

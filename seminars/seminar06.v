@@ -174,7 +174,10 @@ Proof.
       rewrite -[leq (S O) O]/false.
       rewrite -[false && false]/false. by [].
       (* expn_eq0  forall m e : nat, (m ^ e == 0) = (m == 0) && (0 < e) *)
-    + move=> n. rewrite ltn0Sn. rewrite expn_eq0. rewrite ltn0Sn. rewrite Bool.andb_false_l. rewrite Bool.andb_true_r. case: eqP.
+    + move=> n. rewrite ltn0Sn. rewrite expn_eq0. rewrite ltn0Sn.
+      (* rewrite Bool.andb_false_l. rewrite Bool.andb_true_r. *)
+      rewrite !andbT.
+      case: eqP.
       * move=> Hm0. contradiction.
       * exact.
 Qed.
