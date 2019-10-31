@@ -131,15 +131,56 @@ Proof.
   case: eqP.
   - move=> H. apply addnI in H. move: H ->. by rewrite eq_refl.
     move=> H. case: eqP=> //=. move=> Eq. rewrite Eq in H. by case: H.
+    Restart.
+    case : (@eqP nat_eqType (p + m) (p + n)).
+  - move => H.
+    rewrite (addnI H).
+    rewrite eq_refl.
+    reflexivity.
+  - case (@eqP nat_eqType m n).
+    + move -> => contra.
+      case (contra erefl).
+    + reflexivity.
+Restart.
+  case (@eqP nat_eqType m n).
+  - move ->. rewrite eq_refl. reflexivity.
+  - move => H.
+    case eqP => //.
+    move => H1.
+    rewrite (addnI H1) in H.
+    case (H erefl).
 Qed.
+
+(* Set Printing All. *)
+(* Print leq. *)
+(* ltn0  forall n : nat, (n < 0) = false *)
+(* exp0n  forall n : nat, 0 < n -> 0 ^ n = 0 *)
+(* Lemma expn_m_n_plus_ne0: forall (n m : nat), (m <> 0) -> (m ^ n.+1 <> 0). *)
+(* Proof. *)
+(*   move=> n m. move: n. elim: (m). *)
+(*   - move=> n contra. case: (contra erefl). *)
+(*   - move=> n IH n0 H. rewrite expnS. *)
+(*   Qed. *)
 
 Lemma expn_eq0 m e : (m ^ e == 0) = (m == 0) && (e > 0).
 Proof.
-Admitted.
+  case: (@eqP nat_eqType m 0).
+  - move=> H. rewrite -> H. case: e=> //=. move=> n. rewrite -> exp0n => //.
+  - move=> H. case: e.
+    + rewrite expn0.
+      rewrite -[eq_op (S O) O]/false.
+      (* rewrite -/(false=false). *)
+      (* rewrite -[RHS]/false. *)
+      rewrite -[leq (S O) O]/false.
+      rewrite -[false && false]/false. by [].
+      (* expn_eq0  forall m e : nat, (m ^ e == 0) = (m == 0) && (0 < e) *)
+    + move=> n. rewrite ltn0Sn. rewrite expn_eq0. rewrite ltn0Sn. rewrite Bool.andb_false_l. rewrite Bool.andb_true_r. case: eqP.
+      * move=> Hm0. contradiction.
+      * exact.
+Qed.
 
-(* Unset Printing Notations. *)
 (* Print in_mem. *)
-(* Search _ (_ \notin _). *)
+Search _ (_ \notin _).
 Lemma seq_last_notin (s : seq A) x :
         last x s \notin s = (s == [::]).
 Proof.
