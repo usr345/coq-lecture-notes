@@ -14,35 +14,55 @@ Fixpoint eq_seq {T: eqType} (x y: seq T) : bool :=
   end.
 
 Arguments eq_seq T x y : simpl nomatch.
+(* Set Printing All. *)
 
-Lemma eq_seq_correct : forall T: eqType, Equality.axiom (@eq_seq T).
+Search _ eq_op.
+Lemma eq_seq_correct (T: eqType) : Equality.axiom (@eq_seq T).
 Proof.
-  move=> T x. elim: x=> [|x' xs].
+  move=> x. elim: x=> [|x' xs].
   - move=> y. case: y=> //=; by constructor.
   - move=> IH y. case: y=> [| y' ys].
     + rewrite /(eq_seq (x' :: xs) [::]). constructor. done.
     + move=> /=. case E: (x' == y').
+      * move: E. case: eqP=> E _ //=. rewrite <- E. apply/(iffP (IH ys)). by move=> ->. case. exact.
+        (* apply/(iffP (IH ys)); congruence. *)
+      * rewrite andFb. constructor. case. move: E=> /eqP. contradiction.
 Qed.
 
-Compute eq_seq [:: 1] [:: 1;2].
+Definition seq_eq_mixin {T: eqType} := EqMixin (@eq_seq_correct T).
+
+Canonical seq_eqType {T: eqType} := EqType (@seq T) seq_eq_mixin.
+Check (1, [:: 1;2;3]) == (1, [:: 1;2;3]).
+
 
 (** Take apart the following proof: *)
 Lemma size_eq0 (T : eqType) (s : seq T) :
   (size s == 0) = (s == [::]).
 Proof. exact: (sameP nilP eqP). Qed.
 
-
-
 Lemma filter_all T (a : pred T) s :
   all a (filter a s).
-Admitted.
+Proof.
+  elim: s=> [| x xs IH] //. case E: (a x)=> /=.
+  - rewrite E=> //=. rewrite E andbC andbT. apply IH.
+  - by rewrite E.
+Qed.
 
 Lemma filter_id T (a : pred T) s :
   filter a (filter a s) = filter a s.
-Admitted.
+Proof.
+  elim: s=> [| x xs IH] //. case E: (a x)=> /=; rewrite E=> /=.
+  - rewrite E. by rewrite IH.
+  - by rewrite IH.
+Qed.
 
+Search _ leq size.
 Lemma all_count T (a : pred T) s :
   all a s = (count a s == size s).
+Proof.
+  elim: s=> [| x xs IH] //. case E: (a x)=> /=; rewrite E.
+  - rewrite addnC. rewrite addn1. rewrite eqSS. by rewrite -IH.
+  - rewrite addnC=> /=. rewrite addn0. rewrite -size_filter.
 Admitted.
 
 Lemma all_predI T (a1 a2 : pred T) s :
