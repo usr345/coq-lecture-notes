@@ -57,17 +57,28 @@ Proof.
 Qed.
 
 Search _ leq size.
+Locate "=P".
 Lemma all_count T (a : pred T) s :
   all a s = (count a s == size s).
 Proof.
   elim: s=> [| x xs IH] //. case E: (a x)=> /=; rewrite E.
   - rewrite addnC. rewrite addn1. rewrite eqSS. by rewrite -IH.
-  - rewrite addnC=> /=. rewrite addn0. rewrite -size_filter.
-Admitted.
+  - rewrite addnC=> /=. rewrite addn0. case: (count a xs =P (size xs).+1) (count_size a xs)=> // ->. by rewrite ltnn.
+    Undo 2.
+    symmetry.
+    (* case: (eqP : reflect (count _ _ = _.+1) (count _ _ == _.+1)). *)
+    case: (count a xs =P (size xs).+1)=> //.
+(* count_size: forall (T : Type) (a : pred T) (s : seq T), *)
+(*        count a s <= size s *)
+    case: (count_size a xs).
+    move=> H1 H2. move: H2 H1=> ->. by rewrite ltnn.
+Qed.
 
 Lemma all_predI T (a1 a2 : pred T) s :
   all (predI a1 a2) s = all a1 s && all a2 s.
-Admitted.
+Proof.
+  elim: s=>[| x xs IH] //=. rewrite IH. rewrite [LHS]andbA [RHS]andbA. rewrite -[andb (andb (a1 x) (a2 x)) (all a1 xs)]andbA. rewrite -[andb (andb (a1 x) (all a1 xs)) (a2 x)]andbA. rewrite [andb (all a1 xs) (a2 x)]andbC. exact: erefl.
+Qed.
 
 Lemma allP (T : eqType) {a : pred T} {s : seq T} :
   reflect {in s, forall x, a x} (all a s).
