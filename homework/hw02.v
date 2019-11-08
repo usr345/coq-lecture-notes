@@ -9,29 +9,35 @@ Variables A B C : Prop.
 
 Lemma notTrue_iff_False : (~ True) <-> False.
 Proof.
-Admitted.
+  rewrite /not. split.
+  - apply. done.
+  - exact.
+Qed.
 
 Lemma dne_False : ~ ~ False -> False.
 Proof.
-Admitted.
-(* dne_False = @^~ id *)
+  rewrite /not. apply. exact.
+Qed.
 
 Lemma dne_True : ~ ~ True -> True.
 Proof.
-Admitted.
+  move=> H. apply I.
+Qed.
 
 Lemma weak_peirce : ((((A -> B) -> A) -> A) -> B) -> B.
 Proof.
-Admitted.
+  move=> H. apply H. move=> H1. apply: H1. move=> a. apply: H. done.
+Qed.
 
 Lemma imp_trans : (A -> B) -> (B -> C) -> (A -> C).
 Proof.
-Admitted.
+  move=> a_i_b b_i_c a. apply: b_i_c. apply: a_i_b. apply a.
+Qed.
 
 End IntLogic.
 
 
-(** Let's familiarize ourselves with some lemmas from [ssrbool] module.
+(** Let's get familiarize ourselves with some lemmas from [ssrbool] module.
     The proofs are very easy, so the lemma statements are more important here.
  *)
 Section BooleanLogic.
@@ -40,68 +46,114 @@ Variables (A B : Type) (x : A) (f : A -> B) (a b : bool) (vT vF : A).
 
 Lemma negbNE : ~~ ~~ b -> b.
 Proof.
-Admitted.
+  case b. by []. by [].
+Qed.
 
 (** Figure out what [involutive] and [injective] mean
     using Coq's interactive queries. Prove the lemmas.
     Hint: to unfold a definition in the goal use [rewrite /definition] command.
-*)
+ *)
+Check cancel.
+
 Lemma negbK : involutive negb.
 Proof.
-Admitted.
+  rewrite /involutive. rewrite /cancel. case.
+  - rewrite [negb true]/negb. rewrite [negb false]/negb. by [].
+  - by [].
+Qed.
 
 Lemma negb_inj : injective negb.
 Proof.
-Admitted.
+  rewrite /injective. case.
+  - case. by []. by [].
+  - case. by []. by [].
+Qed.
 
 Lemma ifT : b -> (if b then vT else vF) = vT.
 Proof.
-Admitted.
+  case b.
+  - by [].
+  - rewrite [is_true false]/is_true. move /notF. move=> F. exfalso. apply F.
+Qed.
+
+Set Printing Notations.
+Set Printing Coercions.
 
 Lemma ifF : b = false -> (if b then vT else vF) = vF.
 Proof.
-Admitted.
+  move-> . done.
+Qed.
 
 Lemma if_same : (if b then vT else vT) = vT.
 Proof.
-Admitted.
+  by case b.
+Qed.
 
 Lemma if_neg : (if ~~ b then vT else vF) = if b then vF else vT.
 Proof.
-Admitted.
+  rewrite /negb. case b.
+  - exact.
+  - exact.
+Qed.
 
 Lemma fun_if : f (if b then vT else vF) = if b then f vT else f vF.
 Proof.
-Admitted.
+  by case b.
+Qed.
 
 Lemma if_arg (fT fF : A -> B) :
   (if b then fT else fF) x = if b then fT x else fF x.
 Proof.
-Admitted.
+    by case b.
+Qed.
 
 Lemma andbK : a && b || a = a.
 Proof.
-Admitted.
+  case a.
+  - by case b.
+  - by case b.
+Qed.
 
 (** Find out what [left_id], [right_id] mean
     using Coq's interactive queries. Prove the lemmas.
  *)
+Print left_id.
+Print addb.
+
+(* Левая единица: left_id e типа S является левой единицей операции op: S -> T -> T *)
 Lemma addFb : left_id false addb.    (* [addb] means XOR (eXclusive OR operation) *)
 Proof.
-Admitted.
+  rewrite /left_id. move=> x0. case x0.
+  - rewrite [addb false true]/addb. done.
+  - rewrite [addb false false]/addb. done.
+Qed.
 
+Print right_id.
 Lemma addbF : right_id false addb.
 Proof.
-Admitted.
+  rewrite /right_id. move=> x0. case x0.
+  - rewrite [addb true false]/addb. rewrite [negb false]/negb. apply erefl.
+  - rewrite [addb false false]/addb. done.
+Qed.
 
 Lemma addbC : commutative addb.
 Proof.
-Admitted.
+  rewrite /commutative. move=> x0 y. case x0.
+  - by case y.
+  - by case y.
+Qed.
 
 Lemma addbA : associative addb.
 Proof.
-Admitted.
-
+  rewrite /associative. move=> x0 y z.
+  case x0.
+  - case y.
+    + by case z.
+    + by case z.
+  - case y.
+    + by case z.
+    + by case z.
+Qed.
 
 (** Formulate analogous laws (left/right identity, commutativity, associativity)
     for boolean AND and OR and proove those.
@@ -109,6 +161,7 @@ Admitted.
     [Search] command. For instance: [Search _ andb left_id.]
     Have you noticed the naming patterns?
  *)
+
 
 End BooleanLogic.
 
@@ -118,17 +171,28 @@ Section NaturalNumbers.
 (** Figure out what [cancel], [succn], [predn] mean
     using Coq's interactive queries. Prove the lemmas.
  *)
+  About succn.
+  About cancel.
 Lemma succnK : cancel succn predn.
 Proof.
-Admitted.
+  rewrite /cancel. rewrite /Nat.pred. by [].
+Qed.
 
+Unset Printing Notations.
+Set Printing Coercions.
 Lemma add0n : left_id 0 addn.
 Proof.
-Admitted.
+  rewrite /left_id. rewrite /addn. move=> x. elim x.
+  - rewrite [addn_rec O O]/addn_rec. rewrite [Nat.add O O]/Nat.add. done.
+  - move=> n IH. rewrite [addn_rec O (S n)]/addn_rec. rewrite [Nat.add O (S n)]/Nat.add. done.
+Qed.
 
 Lemma addSn m n : m.+1 + n = (m + n).+1.
 Proof.
-Admitted.
+  case m.
+  - by rewrite /addn.
+  - move=> n0. compute. reflexivity.
+Qed.
 
 Lemma add1n n : 1 + n = n.+1.
 Proof.
