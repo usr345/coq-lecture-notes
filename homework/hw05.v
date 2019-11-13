@@ -3,7 +3,6 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-
 Section BooleanReflection.
 
 (** A spec for boolean equality *)
@@ -11,11 +10,24 @@ Variant eq_xor_neq (T : eqType) (x y : T) : bool -> bool -> Set :=
   | EqNotNeq of x = y : eq_xor_neq x y true true
   | NeqNotEq of x != y : eq_xor_neq x y false false.
 
-Search _ reflect.
+Search _(?x == ?y).
+(* Unset Printing Notations. *)
+(* eq_xor_neq (T : Equality.type) (x y : Equality.sort T) *)
+(*   : forall (_ : bool) (_ : bool), Set := *)
+(*     EqNotNeq : forall _ : @eq (Equality.sort T) x y, *)
+(*                @eq_xor_neq T x y true true *)
+(*   | NeqNotEq : forall _ : is_true (negb (@eq_op T x y)), *)
+(*                @eq_xor_neq T x y false false *)
 Lemma eqVneq (T : eqType) (x y : T) :
   eq_xor_neq x y (y == x) (x == y).
 Proof.
-  case (x == y) eqn:E.
+  case: eqP.
+  - move=> ->. rewrite eq_refl. apply EqNotNeq. exact: erefl.
+    Undo 2. by constructor.
+  - move /eqP /negPf. rewrite [y == x] eq_sym. move=> H. rewrite H. apply NeqNotEq. by rewrite H => /=.
+    Restart.
+    rewrite eq_sym. case: (altP eqP); by constructor.
+Qed.
 
 (* Use eqVneq to prove the following lemma.
    Hint: use [case: eqVneq] *)
