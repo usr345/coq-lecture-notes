@@ -28,8 +28,27 @@ Hints:
 Inductive tri : predArgType :=       (* [predArgType] is necessary to make [_ \in _] notation work, see below *)
 | Yes | No | Maybe.
 
+Definition eq_tri (x y: tri) : bool :=
+  match x, y with
+  | Yes,Yes => true
+  | No,No => true
+  | Maybe,Maybe => true
+  | _,_ => false
+  end.
 
-(** Your definitions here *)
+(* forall x y : tri, eq_tri x y = true <-> x = y. *)
+Lemma eq_tri_correct : Equality.axiom eq_tri.
+Proof.
+  move=> x y.
+  by case: x; case: y; constructor.
+  (* - case x ; by case y. *)
+  (* - move=> ->. by case y. *)
+Qed.
+
+Definition tri_eq_mixin := EqMixin eq_tri_correct.
+
+Canonical tri_eqType := EqType tri tri_eq_mixin.
+
 
 
 (** This should work now: *)
@@ -97,4 +116,3 @@ There is a library to reduce boilerplate while building instances of basic MathC
 for inductive data types: https://github.com/arthuraa/deriving.
 Install it (it's available from extra-dev opam repository) an use it to solve some of the above exercise.
 *)
-

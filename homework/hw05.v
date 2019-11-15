@@ -10,14 +10,6 @@ Variant eq_xor_neq (T : eqType) (x y : T) : bool -> bool -> Set :=
   | EqNotNeq of x = y : eq_xor_neq x y true true
   | NeqNotEq of x != y : eq_xor_neq x y false false.
 
-Search _(?x == ?y).
-(* Unset Printing Notations. *)
-(* eq_xor_neq (T : Equality.type) (x y : Equality.sort T) *)
-(*   : forall (_ : bool) (_ : bool), Set := *)
-(*     EqNotNeq : forall _ : @eq (Equality.sort T) x y, *)
-(*                @eq_xor_neq T x y true true *)
-(*   | NeqNotEq : forall _ : is_true (negb (@eq_op T x y)), *)
-(*                @eq_xor_neq T x y false false *)
 Lemma eqVneq (T : eqType) (x y : T) :
   eq_xor_neq x y (y == x) (x == y).
 Proof.
@@ -35,20 +27,28 @@ Lemma eqVneq_example (T : eqType) (w x y z : T) :
   w == x -> z == y ->
   (x == w) /\ (y == z) /\ (z == y).
 Proof.
-Admitted.
+  case: eqP=> //.
+  - move=> Hwx _. case: eqVneq=> //. by rewrite Hwx.
+Qed.
 
+(* Unset Printing Notations. *)
+Search _ (reflect _ _).
+Search _ (prod _ _).
 Lemma andX (a b : bool) : reflect (a * b) (a && b).
 Proof.
-Admitted.
+  case: a; case: b=> /=; constructor; try by case.
+  by [].
+Qed.
 
 Arguments andX {a b}.
 
 (** Solve the following lemma using [andX] lemma
     and [rewrite] tactic *)
+Unset Printing Notations.
 Lemma andX_example a b :
   a && b -> b && a && a && b.
 Proof.
-Admitted.
+  move /andX. move=> H.
 
 (* one can rewrite with andX *)
 
