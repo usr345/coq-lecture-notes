@@ -146,6 +146,10 @@ This can fire up canonical structure search, or projection out of a record type 
 
 About allP.
 
+About prop_in1.
+(* Bool.reflect (prop_in1 (mem s) (inPhantom (forall x : T, a x))) *)
+(*   (all a s) *)
+
 (**
     allP :
     forall (T : eqType) (a : pred T) (s : seq T),

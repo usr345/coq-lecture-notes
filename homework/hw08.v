@@ -3,13 +3,17 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-
+(* Unset Printing Notations. *)
 Lemma enum_example m (r : rel 'I_m) f v (x : nat) :
   (forall j, r v j -> f v j > 0) ->
   x \in [seq f v j | j <- enum 'I_m & r v j] ->
   0 < x.
 Proof.
-Admitted.
+  set (q:=enum_mem (mem (ordinal m))).
+  move: q. elim=> //=.
+  move=> a. case E: (r v a)=> //=. rewrite /in_mem=> /=. move=> l IH H. case: orP=> //. case. case: eqP=> // ->. move=> _ _. apply: H. apply E.
+  move=> Hmem _. apply: IH. apply: H. apply Hmem.
+Qed.
 
 
 
