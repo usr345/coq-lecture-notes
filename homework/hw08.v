@@ -1,9 +1,8 @@
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq choice fintype tuple.
 Set Implicit Arguments.
 Unset Strict Implicit.
-Unset Printing Implicit Defensive.
+(* Unset Printing Implicit Defensive. *)
 
-(* Unset Printing Notations. *)
 Lemma enum_example m (r : rel 'I_m) f v (x : nat) :
   (forall j, r v j -> f v j > 0) ->
   x \in [seq f v j | j <- enum 'I_m & r v j] ->
