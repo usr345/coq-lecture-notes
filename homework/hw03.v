@@ -3,49 +3,107 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-
 Section Classical_reasoning.
 
 (** We assert the classical principle of double negation elimination *)
 Variable DNE : forall A : Prop, ~ ~ A -> A.
 
-(* https://en.wikipedia.org/wiki/Drinker_paradox *)
-Lemma drinker_paradox (P : nat -> Prop) :
-  exists x, P x -> forall y, P y.
-Proof.
-Admitted.
+(* Lemma nat_ind2' (P : nat -> Prop) : *)
+(*   P 0 -> *)
+(*   P 1 -> *)
+(*   (forall n, P n -> P n.+2) -> *)
+(*   forall n, P n. *)
+(* Proof. *)
+(*   move=> P0 P1 H. *)
+(*   case. *)
+(*   - by []. *)
+(*   - move=> n. move: (H n). *)
 
+(* https://en.wikipedia.org/wiki/Drinker_paradox *)
+Unset Printing Notations.
+Lemma drinker_paradox (P : nat -> Prop) :
+  (exists x, P x) -> forall y, P y.
+Proof.
+  move=> x. case x. move=> x0 Px0 y.
+  apply DNE. rewrite /not.
+  Admitted.
 (* This closes the section, discharging over DNE *)
 End Classical_reasoning.
 
 Check drinker_paradox.
-
-
 
 Section Misc.
 
 Variables A B : Type.
 Implicit Types x y : A * B.
 
+(* Unset Printing Notations. *)
 Lemma prod_inj x y :
   x = y <-> (x.1, x.2) = (y.1, y.2).
-Proof. by case: x; case: y. Qed.
+Proof.
+  split.
+  - move=> H. rewrite -H. exact.
+  - case. case x. case y. move=> a b a0 b0.
+    rewrite /((a0, b0).1) /((a, b).1) /((a0, b0).2) /(a, b).2. move=> Eq1 Eq2. rewrite Eq1 Eq2.
+    done.
+Qed.
+
+Lemma prod_inj' x y :
+  x = y <-> (x.1, x.2) = (y.1, y.2).
+Proof.
+  by move: x y=> [x1 x2] [y1 y2].
+Restart.
+  by move: x y=> [? ?] [? ?].
+  Restart.
+  split.
+  - move=> H. rewrite -H. exact.
+  - case. case x. case y. move=> a b a0 b0.
+    rewrite /((a0, b0).1) /((a, b).1) /((a0, b0).2) /(a, b).2. move=> Eq1 Eq2. rewrite Eq1 Eq2.
+    done.
+  Restart.
+    by case: x; case: y.
+Qed.
 
 End Misc.
 
-
+Check eqP.
 
 Section Arithmetics.
+(* Unset Printing Notations. *)
 
+About leq_trans.
+About leq_addr.
 Lemma min_plus_r  n m p  :
   minn n m = n -> minn n (m + p) = n.
 Proof.
-Admitted.
+  move /minn_idPl=> H. apply /minn_idPl. apply leq_trans with (n:=m).
+  - exact H.
+  - apply leq_addr.
+  (*
+  case: n => [|n'].
+  - by rewrite !min0n.
+  - move /minn_idPl => H. apply /minn_idPl. apply ltn_addr. apply H.
+*)
+Qed.
 
+Search (minn _ _).
 Lemma min_plus_minus m n p :
   minn n m + minn (n - m) p = minn n (m + p).
 Proof.
-Admitted.
+  case (n <= m) eqn: NM.
+  - set (H := NM).
+    move: H => /minn_idPl ->.
+    set (H1 := NM).
+    rewrite <- (subn_eq0 n m) in H1.
+    move: H1. move /eqP ->. rewrite -> min0n. rewrite -> addn0.
+    move : (leq_trans NM (leq_addr p m)).
+    move /minn_idPl. move ->. exact.
+  - move: (leq_total n m). rewrite -> NM. simpl. move => H. move : (H). move /minn_idPr. move ->. rewrite -> addn_minr.
+    Search _ (?n + (?m + ?n)).
+    rewrite -> (subnKC H). done.
+    (* rewrite <- (Bool.reflect_iff (minn n m = n) (n <= m) (@minn_idPl n m)) in H. *)
+Qed.
+
 
 Fixpoint zero (n : nat) : nat :=
   if n is n'.+1 then zero n'
@@ -54,7 +112,8 @@ Fixpoint zero (n : nat) : nat :=
 Lemma zero_returns_zero n :
   zero n = 0.
 Proof.
-Admitted.
+  by elim n.
+Qed.
 
 (**
 Claim: every amount of postage that is at least 12 cents can be made
@@ -62,10 +121,7 @@ Claim: every amount of postage that is at least 12 cents can be made
 (** Hint: no need to use induction here *)
 Lemma stamps n : 12 <= n -> exists s4 s5, s4 * 4 + s5 * 5 = n.
 Proof.
-move=> /leq_div2r leq12n; exists (n %/4 - n %% 4), (n %% 4).
-rewrite mulnBl -addnABC -?mulnBr ?muln1 ?leq_mul -?divn_eq //.
-by rewrite (leq_trans _ (leq12n 4)) // -ltnS ltn_pmod.
-Qed.
+Admitted.
 
 End Arithmetics.
 
@@ -125,7 +181,7 @@ Definition epic (f : A -> B) :=
 
 Lemma surj_epic f : surjective f -> epic f.
 Proof.
-Admitted.
+
 
 Lemma epic_surj f : epic f -> surjective f.
   (** Why is this not provable? *)
