@@ -91,9 +91,7 @@ Qed.
 
 Lemma if_neg : (if ~~ b then vT else vF) = if b then vF else vT.
 Proof.
-  rewrite /negb. case b.
-  - exact.
-  - exact.
+  rewrite /negb. case b; by exact.
 Qed.
 
 Lemma fun_if : f (if b then vT else vF) = if b then f vT else f vF.
@@ -109,9 +107,7 @@ Qed.
 
 Lemma andbK : a && b || a = a.
 Proof.
-  case a.
-  - by case b.
-  - by case b.
+  case a; by case b.
 Qed.
 
 (** Find out what [left_id], [right_id] mean

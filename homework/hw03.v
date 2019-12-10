@@ -20,7 +20,6 @@ Variable DNE : forall A : Prop, ~ ~ A -> A.
 (*   - move=> n. move: (H n). *)
 
 (* https://en.wikipedia.org/wiki/Drinker_paradox *)
-Unset Printing Notations.
 Lemma drinker_paradox (P : nat -> Prop) :
   (exists x, P x) -> forall y, P y.
 Proof.
@@ -115,13 +114,15 @@ Proof.
   by elim n.
 Qed.
 
+Search "divn".
 (**
 Claim: every amount of postage that is at least 12 cents can be made
        from 4-cent and 5-cent stamps. *)
 (** Hint: no need to use induction here *)
 Lemma stamps n : 12 <= n -> exists s4 s5, s4 * 4 + s5 * 5 = n.
 Proof.
-Admitted.
+  case n=> [//| n'].
+  move=> H. exists (n' %/ 4 - n' %% 4). exists (n' %% 4).
 
 End Arithmetics.
 
