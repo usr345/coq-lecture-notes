@@ -114,15 +114,120 @@ Proof.
   by elim n.
 Qed.
 
-Search "divn".
+Search "ltn_mod".
 (**
 Claim: every amount of postage that is at least 12 cents can be made
        from 4-cent and 5-cent stamps. *)
 (** Hint: no need to use induction here *)
+Search (_ + _ - _).
+
+Lemma my_lemma n : n %/ 4 * 4 + n %% 4 * 5 - n %% 4 * 4 = n.
+Proof.
+  rewrite -addnBA; last first.
+  Search _ (_ * _ <= _ * _).
+  - rewrite leq_mul2l. rewrite orbC. done.
+  - rewrite -mulnBr. rewrite muln1.
+    Print right_distributive.
+  (* n %/ 4 * 4 + n %% 4 = n. *)
+  symmetry. apply: divn_eq n 4.
+Qed.
+
 Lemma stamps n : 12 <= n -> exists s4 s5, s4 * 4 + s5 * 5 = n.
 Proof.
-  case n=> [//| n'].
-  move=> H. exists (n' %/ 4 - n' %% 4). exists (n' %% 4).
+  Search "mod".
+  set (H := ltn_mod n 4).
+  Search _ (0 < ?a.+1).
+  rewrite -> ltn0Sn in H.
+  move => C.
+  exists ((n - (n %% 4) - (n %% 4) * 4) %/ 4), (n %% 4).
+  About divn_eq.
+  set (H1 := divn_eq n 4).
+  assert ((12 %/ 4) * 4 <= n - n %% 4).
+  - rewrite -> H1 at 1.
+    Search _ (?b + ?a - ?c).
+    About addnBA.
+    rewrite <- (addnBA (n %/ 4 * 4) (leqnn (n %% 4))).
+    rewrite -> subnn.
+    rewrite -> addn0.
+    Search "leq".
+    rewrite -> leq_mul2r.
+    simpl.
+    apply leq_div2r.
+    exact C.
+  Search "leq".
+  assert (n %% 4 <= 3).
+  - by [].
+  Search "divn".
+  About divnBl.
+  set (H3 := divn_eq (n - n %% 4 - n %% 4 * 4) 4).
+  Search "subn".
+  About subnK.
+  Search "mod".
+  rewrite <- (subnK (leq_mod (n - n %% 4 - n %% 4 * 4) 4)) in H3 at 1.
+  Search _ (?a + ?b == ?c + ?b).
+  About eqn_add2r.
+  (* apply eq_add2r in H3. *)
+  (* move : H3 <-. *)
+  (* assert (n - n %% 4 = n %/ 4 * 4). *)
+  (* - rewrite -> H1 at 1. *)
+  (*   Search _ cancel addn subn. *)
+  (*   rewrite -> addnK. *)
+  (*   reflexivity. *)
+  (* rewrite -> H3 at 2. *)
+  (* rewrite <- mulnBl. *)
+  (* Search "mod". *)
+  (* rewrite -> modnMl. *)
+  (* rewrite -> subn0. *)
+  (* Search "subn". *)
+  (* rewrite <- subnDA. *)
+  (* Search "muln". *)
+  (* rewrite <- (muln1 (n %% 4)) at 1. *)
+  (* rewrite <- mulnDr. *)
+  (* assert (1 + 4 = 5). *)
+  (* - reflexivity. *)
+  (* rewrite -> H4. *)
+  (* Search _ (?a <= ?b -> ?a = ?b \/ ?a.+1 <= ?b). *)
+  (* About leq_eqVlt. *)
+  (* rewrite -> leq_eqVlt in C. *)
+  (* rewrite -> leq_eqVlt in C. *)
+  (* rewrite -> leq_eqVlt in C. *)
+  (* move : C. *)
+  (* move /orP. *)
+  (* case. *)
+  (* - move /eqP. *)
+  (*   move => C. *)
+  (*   rewrite <- C in *. *)
+  (*   reflexivity. *)
+  (* move /orP. *)
+  (* case. *)
+  (* - move /eqP. *)
+  (*   move => C. *)
+  (*   rewrite <- C in *. *)
+  (*   reflexivity. *)
+  (* move /orP. *)
+  (* case. *)
+  (* - move /eqP. *)
+  (*   move => C. *)
+  (*   rewrite <- C in *. *)
+  (*   reflexivity. *)
+  (* assert (n %% 4 * 5 <= 15). *)
+  (* - Search "leq". *)
+  (*   exact (leq_mul H2 (leqnn 5)). *)
+  (* move => C. *)
+  (* set (H6 := leq_trans H5 C). *)
+  (* exact (subnK H6). *)
+  Restart.
+  move=> H. exists (n %/ 4 - n %% 4). exists (n %% 4). rewrite mulnBl.
+  rewrite addnBAC; last first.
+  - rewrite leq_mul2r=> /=.
+    assert (H1: n %% 4 <= 3).
+    { apply: ltn_mod n 4. }
+    assert (H2: 3 <= n %/ 4).
+    { rewrite -[3]/(12 %/ 4). apply: leq_div2r 4 12 n H. }
+    (* leq_trans  forall n m p : nat, m <= n -> n <= p -> m <= p *)
+    apply: leq_trans H1 H2.
+  - apply my_lemma.
+Qed.
 
 End Arithmetics.
 
