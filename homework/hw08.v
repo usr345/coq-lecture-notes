@@ -52,7 +52,24 @@ Definition tri_eq_mixin := EqMixin eq_tri_correct.
 
 Canonical tri_eqType := EqType tri tri_eq_mixin.
 
+(* Definition in_mem (x : tri) (T : Type) : bool := *)
 
+(* Definition tri_choice_mixin := choiceMixin choice_tri_correct. *)
+(* Canonical tri_choiceType := choiceType tri tri_choice_mixin *)
+
+Definition count_tri (T: type) : nat :=
+  match x, y with
+  | Yes,Yes => true
+  | No,No => true
+  | Maybe,Maybe => true
+  | _,_ => false
+  end.
+
+(* Definition tri_count_mixin := countMixin count_tri_correct. *)
+(* Canonical tri_countType := countType tri tri_count_mixin *)
+
+About card.
+Locate "#|".
 
 (** This should work now: *)
 Check (Yes != No) && (No \in tri) && (#| tri | == 3).

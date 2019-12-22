@@ -121,6 +121,22 @@ Claim: every amount of postage that is at least 12 cents can be made
 (** Hint: no need to use induction here *)
 Search (_ + _ - _).
 
+Lemma eq_add2r : forall (p n m : nat), n+p = m+p -> n=m.
+Proof.
+  intros.
+  set (H1 := eqn_add2r p n m).
+  rewrite -> H in H1.
+  Search _ (?a == ?a).
+  rewrite -> eq_refl in H1.
+  Search _ (?a = ?b -> ?b = ?a).
+  About esym.
+  apply esym in H1.
+  move : H1.
+  move /eqP.
+  exact.
+Qed.
+
+
 Lemma my_lemma n : n %/ 4 * 4 + n %% 4 * 5 - n %% 4 * 4 = n.
 Proof.
   rewrite -addnBA; last first.
@@ -134,6 +150,17 @@ Qed.
 
 Lemma stamps n : 12 <= n -> exists s4 s5, s4 * 4 + s5 * 5 = n.
 Proof.
+  move=> H. exists (n %/ 4 - n %% 4). exists (n %% 4). rewrite mulnBl.
+  rewrite addnBAC; last first.
+  - rewrite leq_mul2r=> /=.
+    assert (H1: n %% 4 <= 3).
+    { apply: ltn_mod n 4. }
+    assert (H2: 3 <= n %/ 4).
+    { rewrite -[3]/(12 %/ 4). apply: leq_div2r 4 12 n H. }
+    (* leq_trans  forall n m p : nat, m <= n -> n <= p -> m <= p *)
+    apply: leq_trans H1 H2.
+  - apply my_lemma.
+  Restart.
   Search "mod".
   set (H := ltn_mod n 4).
   Search _ (0 < ?a.+1).
@@ -166,67 +193,56 @@ Proof.
   rewrite <- (subnK (leq_mod (n - n %% 4 - n %% 4 * 4) 4)) in H3 at 1.
   Search _ (?a + ?b == ?c + ?b).
   About eqn_add2r.
-  (* apply eq_add2r in H3. *)
-  (* move : H3 <-. *)
-  (* assert (n - n %% 4 = n %/ 4 * 4). *)
-  (* - rewrite -> H1 at 1. *)
-  (*   Search _ cancel addn subn. *)
-  (*   rewrite -> addnK. *)
-  (*   reflexivity. *)
-  (* rewrite -> H3 at 2. *)
-  (* rewrite <- mulnBl. *)
-  (* Search "mod". *)
-  (* rewrite -> modnMl. *)
-  (* rewrite -> subn0. *)
-  (* Search "subn". *)
-  (* rewrite <- subnDA. *)
-  (* Search "muln". *)
-  (* rewrite <- (muln1 (n %% 4)) at 1. *)
-  (* rewrite <- mulnDr. *)
-  (* assert (1 + 4 = 5). *)
-  (* - reflexivity. *)
-  (* rewrite -> H4. *)
-  (* Search _ (?a <= ?b -> ?a = ?b \/ ?a.+1 <= ?b). *)
-  (* About leq_eqVlt. *)
-  (* rewrite -> leq_eqVlt in C. *)
-  (* rewrite -> leq_eqVlt in C. *)
-  (* rewrite -> leq_eqVlt in C. *)
-  (* move : C. *)
-  (* move /orP. *)
-  (* case. *)
-  (* - move /eqP. *)
-  (*   move => C. *)
-  (*   rewrite <- C in *. *)
-  (*   reflexivity. *)
-  (* move /orP. *)
-  (* case. *)
-  (* - move /eqP. *)
-  (*   move => C. *)
-  (*   rewrite <- C in *. *)
-  (*   reflexivity. *)
-  (* move /orP. *)
-  (* case. *)
-  (* - move /eqP. *)
-  (*   move => C. *)
-  (*   rewrite <- C in *. *)
-  (*   reflexivity. *)
-  (* assert (n %% 4 * 5 <= 15). *)
-  (* - Search "leq". *)
-  (*   exact (leq_mul H2 (leqnn 5)). *)
-  (* move => C. *)
-  (* set (H6 := leq_trans H5 C). *)
-  (* exact (subnK H6). *)
-  Restart.
-  move=> H. exists (n %/ 4 - n %% 4). exists (n %% 4). rewrite mulnBl.
-  rewrite addnBAC; last first.
-  - rewrite leq_mul2r=> /=.
-    assert (H1: n %% 4 <= 3).
-    { apply: ltn_mod n 4. }
-    assert (H2: 3 <= n %/ 4).
-    { rewrite -[3]/(12 %/ 4). apply: leq_div2r 4 12 n H. }
-    (* leq_trans  forall n m p : nat, m <= n -> n <= p -> m <= p *)
-    apply: leq_trans H1 H2.
-  - apply my_lemma.
+  apply eq_add2r in H3.
+  move : H3 <-.
+  assert (n - n %% 4 = n %/ 4 * 4).
+  - rewrite -> H1 at 1.
+    Search _ cancel addn subn.
+    rewrite -> addnK.
+    reflexivity.
+  rewrite -> H3 at 2.
+  rewrite <- mulnBl.
+  Search "mod".
+  rewrite -> modnMl.
+  rewrite -> subn0.
+  Search "subn".
+  rewrite <- subnDA.
+  Search "muln".
+  rewrite <- (muln1 (n %% 4)) at 1.
+  rewrite <- mulnDr.
+  assert (1 + 4 = 5).
+  - reflexivity.
+  rewrite -> H4.
+  Search _ (?a <= ?b -> ?a = ?b \/ ?a.+1 <= ?b).
+  About leq_eqVlt.
+  rewrite -> leq_eqVlt in C.
+  rewrite -> leq_eqVlt in C.
+  rewrite -> leq_eqVlt in C.
+  move : C.
+  move /orP.
+  case.
+  - move /eqP.
+    move => C.
+    rewrite <- C in *.
+    reflexivity.
+  move /orP.
+  case.
+  - move /eqP.
+    move => C.
+    rewrite <- C in *.
+    reflexivity.
+  move /orP.
+  case.
+  - move /eqP.
+    move => C.
+    rewrite <- C in *.
+    reflexivity.
+  assert (n %% 4 * 5 <= 15).
+  - Search "leq".
+    exact (leq_mul H2 (leqnn 5)).
+  move => C.
+  set (H6 := leq_trans H5 C).
+  exact (subnK H6).
 Qed.
 
 End Arithmetics.
@@ -285,9 +301,20 @@ Definition surjective (f : A -> B) :=
 Definition epic (f : A -> B) :=
   forall C (g1 g2 : B -> C), g1 \o f =1 g2 \o f -> g1 =1 g2.
 
+Search _ (_ \o _).
+Locate "=1".
+(* Unset Printing Notations. *)
 Lemma surj_epic f : surjective f -> epic f.
 Proof.
-
+  case.
+  move=> g Hcomp.
+  move=> C g1 g2 H.
+  move=> x.
+  assert (HAnton: g1 \o f \o g =1 g2 \o f \o g).
+  - move=> x1 /=. apply: H.
+  rewrite 2!compA in HAnton. move: (HAnton x)=> /=.
+  move: (Hcomp x)=> /= ->. exact.
+Qed.
 
 Lemma epic_surj f : epic f -> surjective f.
   (** Why is this not provable? *)
@@ -302,17 +329,22 @@ Context {A B C : Type}.
 Lemma epic_comp (f : B -> C) (g : A -> B) :
   epic f -> epic g -> epic (f \o g).
 Proof.
-Admitted.
+  rewrite /epic.
+  move=> Hf Hg C0 g1 g2 Hcomp. apply: (Hf C0 g1 g2). rewrite -2!compA in Hcomp. move: (Hg _ _ _ Hcomp). exact.
+Qed.
 
 Lemma comp_epicl (f : B -> C) (g : A -> B) :
   epic (f \o g) -> epic f.
 Proof.
-Admitted.
+  rewrite /epic=> Hcomp C0 g1 g2 H. apply: (Hcomp C0 g1 g2). move=> x. move: (H (g x))=> /=. exact.
+Qed.
 
+(* Unset Printing Notations. *)
 Lemma retraction_epic (f : B -> A) (g : A -> B) :
   (f \o g =1 id) -> epic f.
 Proof.
-Admitted.
+  rewrite !/epic /eqfun=> H D g1 g2 Hcomp x. move: (Hcomp (g x))=> /=. move: (H x)=> /= ->. exact.
+Qed.
 
 End EpicProperties.
 
@@ -329,13 +361,18 @@ Context {B C : Type}.
 Definition monic (f : B -> C) :=
   forall A (g1 g2 : A -> B), f \o g1 =1 f \o g2 -> g1 =1 g2.
 
+(* Unset Printing Notations. *)
 Lemma inj_monic f : injective f -> monic f.
 Proof.
-Admitted.
+  rewrite /injective /monic. move=> H A g1 g2 Hcomp. rewrite /eqfun=> x. move: (Hcomp x)=> /= => H1. move: (H (g1 x) (g2 x)). apply. exact.
+Qed.
 
 Lemma monic_inj f : monic f -> injective f.
 Proof.
-Admitted.
+  rewrite /injective /monic=> H x1 x2 Hinj. apply: (H B (fun _  => x1) (fun _ => x2)).
+  - rewrite /eqfun => /=. move=> _. exact Hinj.
+  - exact x1.
+Qed.
 
 End InjectiveMonic.
 
@@ -346,17 +383,26 @@ Context {A B C : Type}.
 Lemma monic_comp (f : B -> C) (g : A -> B) :
   monic f -> monic g -> monic (f \o g).
 Proof.
-Admitted.
+  rewrite /monic. move=> Hf Hg T g1 g2 Hfg.
+  - apply: (Hg T g1 g2).
+  - apply: (Hf T (g \o g1) (g \o g2)).
+  - exact Hfg.
+Qed.
 
 Lemma comp_monicr (f : B -> C) (g : A -> B) :
   monic (f \o g) -> monic g.
 Proof.
-Admitted.
+  rewrite /monic /eqfun /= => Hcomp_m T g1 g2 Hcomp.
+  - apply: (Hcomp_m T g1 g2).
+  - move=> x. rewrite (Hcomp x). exact.
+Qed.
 
 Lemma section_monic (f : B -> A) (g : A -> B) :
   (g \o f =1 id) -> monic f.
 Proof.
-Admitted.
+  rewrite /monic /eqfun /= => Гобр T g1 g2 Гкомп x.
+  rewrite -(Гобр (g1 x)) -(Гобр (g2 x)) Гкомп. exact.
+Qed.
 
 End MonicProperties.
 
