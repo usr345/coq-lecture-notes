@@ -100,7 +100,7 @@ Qed.
 
 (**
 This is because we cannot specify the target
-class of this tentative coercion:
+class of this tentative (предварительный, опытный) coercion:
   Coercion proj1_sig : sig >-> ???.
  *)
 
@@ -508,6 +508,3 @@ Check forall x : R, x * 1 == x.
 Check forall m : 'M[R]_(4,4), m == m * m.
 
 End Rings.
-
-
-
